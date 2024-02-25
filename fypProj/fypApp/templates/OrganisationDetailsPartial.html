@@ -1,0 +1,118 @@
+<div class="contentFlexRow" id="">
+    <div class="col-lg-8">
+        <div class="titleText">
+            {{ organisationDetails.organisationName }} ({{ organisationDetails.organisationFocus }})
+            {% if userLoggedIn.userType == 2 and user.isOrganisation and fromOrg %}
+            <button id="UpdateOrganisationButton" onclick="openOrganisationDetailsForm()" class="simpleButton">
+                Update Organisation details
+            </button>
+            {% endif %}
+        </div>
+        <div id="orgname" hidden>{{ organisationDetails.organisationName }}</div>
+        <div class="marginBetweenTextDivs">
+            Current Donation Accumilation: {{organisationDetails.donations}}
+        </div>
+        <div class="marginBetweenTextDivs">
+            Reports: {{organisationDetails.complains}}
+            {% if userLoggedIn.userType == 2 and not user.isOrganisation %}
+            {%if alreadyReported %}
+            <span class="rejectionText textRed">*you have reported this organisation</span>
+            {% else %}
+            <button id="ReportOrganisationButton"
+                onclick="reportOrganisationBtn('{{ organisationDetails.organisationName }}')" class="simpleButton">
+                Report Organisation!
+            </button>
+            {% endif %}
+            {% endif %}
+        </div>
+        <div class="marginBetweenTextDivs">{{ organisationDetails.organisationShortDescription }}</div>
+
+        <div class="imageRow marginBetweenTextDivs">
+            {% if organisationDetails.organisationImage1 %}
+            <img class="threeimage" src="{{ organisationDetails.organisationImage1.url }}" alt="Image 1">
+            {% endif %}
+
+            {% if organisationDetails.organisationImage2 %}
+            <img class="threeimage" src="{{ organisationDetails.organisationImage2.url }}" alt="Image 2">
+
+            {% endif %}
+
+            {% if organisationDetails.organisationImage3 %}
+            <img class="threeimage" src="{{ organisationDetails.organisationImage3.url }}" alt="Image 3">
+            {% endif %}
+        </div>
+        <div class="marginBetweenTextDivs">{{ organisationDetails.organisationLongDescription }}</div>
+    </div>
+    <div class="col-lg-4">
+        <div class="centeredText titleTextSmaller">Donations</div>
+        {% if userLoggedIn %}
+            {% if organisationDetails.acceptQrDonations %}
+            <div class="form-group">
+                <label for="donationAmount">Donation Amount:</label>
+            </div>
+            <div class="contentFlexRow">
+                <input type="text" class="form-control" id="donationAmount" name="donationAmount" value="">
+                <button id="GenerateRQButton" onclick="generateQR()" class="simpleButton"
+                    style="width: 180px;padding: 8px;">
+                    Generate QR!
+                </button>
+            </div>
+            {% endif %}
+
+            <div class="imageRow marginBetweenTextDivs contentFlexCol">
+                {% if organisationDetails.acceptQrDonations %}
+                <div id="qrImage" class="qrimage centeredItems"></div>
+                {% endif %}
+
+                <div class="qrimagetext">
+                    {% if organisationDetails.acceptQrDonations %}
+                    *This organisation is currently accepting donations.
+                    {% else %}
+                    *This organisation is not accepting donations at the moment.
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="centeredText alert alert-warning">Login/Sign up to make a donation!</div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function generateQR() {
+        var donationAmount = document.getElementById("donationAmount").value;
+        console.log(donationAmount)
+        if (donationAmount.trim() !== "") {
+            var qrImage = document.getElementById("qrImage");
+            console.log(qrImage)
+            qrImage.src = "";  // Clear the previous QR code
+
+            var qr = new QRCode(qrImage, {
+                text: "Would you like to donate " + donationAmount + "?",
+                width: 250,
+                height: 250
+            });
+            var imageData = qrImage.src;
+            console.log(imageData)
+
+            $.ajax({
+                type: 'POST',
+                url: '/fypApp/addDonationAmount/',
+                data: {
+                    organisationDetails: document.getElementById("orgname").textContent,
+                    donationAmount: donationAmount,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',  // Include the CSRF token
+                },
+                success: function (response) {
+                    alert('Details updated successfully');
+                },
+                error: function (error) {
+                    console.error('Error updating details:', error);
+                    alert(error.responseText);
+                }
+            });
+        } else {
+            alert("Please enter a valid donation amount.");
+        }
+    }
+</script>

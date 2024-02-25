@@ -1,0 +1,304 @@
+<div class="contentFlexCol">
+    <div class="" id="allEventsResults">
+        {% for activity in activities %}
+        <div class="eventItems contentFlexRow align-items-center"
+            id="{{activity.activityId}}{{activity.title}}{{activity.activityType}}">
+            <div class="col-lg-4">
+                {% if activity.activityImage1 %}
+                <img class="reducedimage" src="{{ activity.activityImage1.url }}" alt="Image 1">
+                {% else %}
+                <div class="reducedImageEmpty textRed ">No Image</div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <div class="titleText">
+                    {{ activity.title }} ({{ activity.activityType }})
+                </div>
+                <div class="maximum-signups">
+                    Maximum Signups: {{ activity.currentsignup }} / {{ activity.maximumSignups }}
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <button id="userViewEventButton{{ activity.activityId }}"
+                    onclick="clickUserViewEventButton('{{ activity.activityId|safe }}',
+                    '{{ activity.title|safe }}', '{{ activity.activityType|safe }}', '{{ activity.maximumSignups|safe }}')" class="simpleButton">
+                    View
+                </button>
+            </div>
+            <div id="viewActivityDesc{{ activity.activityId }}" hidden>{{ activity.description }}</div>
+            <div id="viewActivityImage1{{ activity.activityId }}" hidden>
+                {% if activity.activityImage1 %}
+                {{ activity.activityImage1.url }}
+                {% endif %}
+            </div>
+            <div id="viewActivityImage2{{ activity.activityId }}" hidden>
+                {% if activity.activityImage2 %}
+                {{ activity.activityImage2.url }}
+                {% endif %}
+            </div>
+            <div id="viewActivityImage3{{ activity.activityId }}" hidden>
+                {% if activity.activityImage3 %}
+                {{ activity.activityImage3.url }}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal" id="eventDetailsModal">
+    <div class="modal-dialog modalsizing">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="activityDisplayId" hidden></h4>
+                <h4 class="modal-title" id="activityDisplayTitle"></h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body contentFlexCol">
+                <div class="contentFlexRow marginBetweenTextDivs">
+                    <img id="modalImg1" class="threeimage" src="" alt="Image 1">
+                    <img id="modalImg2" class="threeimage" src="" alt="Image 2">
+                    <img id="modalImg3" class="threeimage" src="" alt="Image 3">
+                </div>
+                <div id="activityDisplayDesc" class="marginBetweenTextDivs"></div>
+                <div id="activityDisplaySignups" class="marginBetweenTextDivs"></div>
+                <div class="modal-footer" id="modalFooter">
+                    {% if userLoggedIn %}
+                        {% if userLoggedIn.userType == 1 %}
+                        <button class="btn btn-primary" onclick="alert('Admins cannot sign up for events')">SignUp</button>
+                        {% elif userLoggedIn.userType == 2 and user.isOrganisation %}
+                        <button class="btn btn-primary"
+                            onclick="alert('Organisations cannot sign up for events')">SignUp</button>
+                        {% else %}
+                        <button class="btn btn-primary" id="likeEventBtn" onclick="LikeEvent()">Like</button>
+                        <button class="btn btn-primary" id="registerEventBtn" onclick="signUpEvent()">SignUp</button>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning">Login/Sign up like or sign up for an event!</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var userLoggedIn = "{{ userLoggedIn }}";
+    var likedActivities = JSON.parse("{{ likedActivities|safe }}") || [];
+    var registeredActivities = JSON.parse("{{ registeredActivities|safe }}") || [];
+
+    console.log(likedActivities)
+    console.log(registeredActivities)
+    function clickUserViewEventButton(activityId, title, activityType, maximumSignups) {
+        openEventDetailsForm();
+        document.getElementById("activityDisplayId").textContent = activityId;
+        document.getElementById("activityDisplayTitle").textContent = title + " (" + activityType + ")";
+        document.getElementById("activityDisplayDesc").textContent = document.getElementById('viewActivityDesc' + activityId).textContent;
+        document.getElementById("activityDisplaySignups").textContent = "Maximum Signups: " + maximumSignups;
+        var image1Url = document.getElementById("viewActivityImage1" + activityId).textContent.trim() || null;
+        var image2Url = document.getElementById("viewActivityImage2" + activityId).textContent.trim() || null;
+        var image3Url = document.getElementById("viewActivityImage3" + activityId).textContent.trim() || null;
+
+        if (!image1Url) {
+            $('#modalImg1').attr('hidden', true);
+        } else {
+            $('#modalImg1').attr('hidden', false);
+            document.getElementById("modalImg1").src = image1Url;
+
+        }
+
+        if (!image2Url) {
+            $('#modalImg2').attr('hidden', true);
+        } else {
+            $('#modalImg2').attr('hidden', false);
+            document.getElementById("modalImg2").src = image2Url;
+
+        }
+
+        if (!image3Url) {
+            $('#modalImg3').attr('hidden', true);
+        } else {
+            $('#modalImg3').attr('hidden', false);
+            document.getElementById("modalImg3").src = image3Url;
+        }
+
+
+        var isRegistered = false;
+
+        for (var i = 0; i < registeredActivities.length; i++) {
+            console.log("here" + registeredActivities[i]);
+            console.log(activityId);
+            if (registeredActivities[i] == activityId) {
+                console.log("Matched");
+                isRegistered = true;
+                break;
+            }
+        }
+
+        if (isRegistered) {
+            $('#registerEventBtn').text("Undo SignUp");
+            $('#registerEventBtn').attr('onclick', 'removeEvent()');
+        } else {
+            $('#registerEventBtn').text("SignUp");
+            $('#registerEventBtn').attr('onclick', 'signUpEvent()');
+        }
+
+        var isLiked = false;
+
+        for (var i = 0; i < likedActivities.length; i++) {
+            console.log("here" + likedActivities[i]);
+            console.log(activityId);
+            if (likedActivities[i] == activityId) {
+                console.log("Matched");
+                isLiked = true;
+                break;
+            }
+        }
+
+        if (isLiked) {
+            $('#likeEventBtn').text("Unlike");
+            $('#likeEventBtn').attr('onclick', 'unlikeEvent()');
+        } else {
+            $('#likeEventBtn').text("Like");
+            $('#likeEventBtn').attr('onclick', 'LikeEvent()');
+        }
+    }
+
+
+    function openEventDetailsForm() {
+        $('#eventDetailsModal').modal('show');
+    }
+
+    function closeEventDetailsForm() {
+        $('#eventDetailsModal').modal('hide');
+    }
+
+    function signUpEvent() {
+        if (userLoggedIn) {
+            var activityId = document.getElementById("activityDisplayId").textContent
+            $.ajax({
+                type: 'POST',
+                url: '/fypApp/eventSignup/',
+                data: {
+                    activityId: activityId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',  // Include the CSRF token
+                },
+                success: function (response) {
+                    alert('Details updated successfully');
+                    window.location.href = "/fypApp/redirectToAllEvents";
+                },
+                error: function (error) {
+                    console.error('Error updating details:', error);
+                    alert(error.responseText);
+                }
+            });
+        }
+        else {
+            closeEventDetailsForm()
+            var loginPopup = document.getElementById('loginPopup');
+            loginPopup.style.display = 'block';
+        }
+    }
+
+    function removeEvent() {
+        if (userLoggedIn) {
+            var activityId = document.getElementById("activityDisplayId").textContent
+            $.ajax({
+                type: 'POST',
+                url: '/fypApp/removeEvent/',
+                data: {
+                    activityId: activityId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',  // Include the CSRF token
+                },
+                success: function (response) {
+                    alert('Details updated successfully');
+                    window.location.href = "/fypApp/redirectToAllEvents";
+
+                },
+                error: function (error) {
+                    console.error('Error updating details:', error);
+                    alert(error.responseText);
+                }
+            });
+        }
+        else {
+            closeEventDetailsForm()
+            var loginPopup = document.getElementById('loginPopup');
+            loginPopup.style.display = 'block';
+        }
+    }
+
+    function LikeEvent() {
+        if (userLoggedIn) {
+            var activityId = document.getElementById("activityDisplayId").textContent
+            $.ajax({
+                type: 'POST',
+                url: '/fypApp/eventLike/',
+                data: {
+                    activityId: activityId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',  // Include the CSRF token
+                },
+                success: function (response) {
+                    alert('Details updated successfully');
+                    window.location.href = "/fypApp/redirectToAllEvents";
+                },
+                error: function (error) {
+                    console.error('Error updating details:', error);
+                    alert(error.responseText);
+                }
+            });
+        }
+        else {
+            closeEventDetailsForm()
+            var loginPopup = document.getElementById('loginPopup');
+            loginPopup.style.display = 'block';
+        }
+    }
+
+    function unlikeEvent() {
+        if (userLoggedIn) {
+            var activityId = document.getElementById("activityDisplayId").textContent
+            $.ajax({
+                type: 'POST',
+                url: '/fypApp/eventUnlike/',
+                data: {
+                    activityId: activityId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                success: function (response) {
+                    alert('Details updated successfully');
+                    window.location.href = "/fypApp/redirectToAllEvents";
+                },
+                error: function (error) {
+                    console.error('Error updating details:', error);
+                    alert(error.responseText);
+                }
+            });
+        }
+        else {
+            closeEventDetailsForm()
+            var loginPopup = document.getElementById('loginPopup');
+            loginPopup.style.display = 'block';
+        }
+    }
+
+    function searchEventsButtonClick() {
+        var toSearch = document.getElementById("searchEventsBar").value.toLowerCase();
+        var tableContent = document.getElementById("allEventsResults");
+        console.log(toSearch);
+        console.log(tableContent);
+
+        for (var i = 0; i < tableContent.children.length; i++) {
+            var child = tableContent.children[i];
+
+            var childId = child.id ? child.id.toLowerCase() : "";
+
+            if (childId && childId.indexOf(toSearch) === -1) {
+                child.setAttribute('hidden', true);
+            } else {
+                child.removeAttribute('hidden');
+            }
+        }
+    }
+
+</script>

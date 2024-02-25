@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="contentBackgroundMargins">
+        <div class="contentBackground">
+            <div class="contentMargins">
+                <div class="titleTextSmaller divcenter contentFlexRow">Organisation Review</div>
+                <div class="divcenter contentFlexRow">
+                    <button id="" class="simpleButton" onclick="clickApproved()">
+                        Approved Organisations
+                    </button>
+                    <button id="" class="simpleButton" onclick="clickPending()">
+                        Pending reviews
+                    </button>
+                    <button id="" class="simpleButton" onclick="clickRejected()">
+                        Rejected reviews
+                    </button>
+                </div>
+                <div class="contentFlexRow divcenter">
+                <div class="col-lg-8">
+                    <div class="contentMargins">
+                        <div class="contentFlexRow align-items-center">
+                            <label for="search">Search:</label>
+                            <input type="text" class="form-control NavText" id="searchReviewBar" name="search" value="">
+                            <button id="" class="simpleButton" onclick="searchReviewClick()">
+                                    View
+                                </button>
+                        </div>
+                    </div>
+
+                    <div class="marginBetweenTextDivs" id="approvedOrgList">
+                        {% include 'organisationsPartial.html' %}  
+                    </div>
+
+                    <div class="marginBetweenTextDivs" id="pendingOrgList" hidden>
+                        {% include 'organisationsPartialReviewUse.html' %}  
+                    </div>
+
+                    <div class="marginBetweenTextDivs" id="rejectedOrgList" hidden>
+                        {% include 'organisationsPartialRejectedUse.html' %}  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+
+    function searchReviewClick(){
+        var toSearch = document.getElementById("searchReviewBar").value.toLowerCase();
+        var tableContent = null
+        if ($('#approvedOrgList').is(':visible')) {
+            tableContent = document.getElementById("allOrganisationResults");
+        }
+        if ($('#pendingOrgList').is(':visible')) {
+            tableContent = document.getElementById("orgPartialReviewResults");
+        }        
+        if ($('#rejectedOrgList').is(':visible')) {
+            tableContent = document.getElementById("orgRejectedResults");
+        }
+
+        for (var i = 0; i < tableContent.children.length; i++) {
+            var child = tableContent.children[i];
+
+            var childId = child.id ? child.id.toLowerCase() : "";
+
+            if (childId && childId.indexOf(toSearch) === -1) {
+                child.setAttribute('hidden', true);
+            } else {
+                child.removeAttribute('hidden');
+            }
+        }
+    }
+
+    function clickApproved(){
+        document.getElementById("searchReviewBar").value = "";
+        $('#pendingOrgList').attr('hidden',true)
+        $('#rejectedOrgList').attr('hidden',true)
+        $('#approvedOrgList').attr('hidden',false)
+        var tableContent = document.getElementById("allOrganisationResults");
+        for (var i = 0; i < tableContent.children.length; i++) {
+            var child = tableContent.children[i];
+            child.removeAttribute('hidden');            
+        }
+    }
+    
+    function clickPending(){
+        document.getElementById("searchReviewBar").value = "";
+        $('#pendingOrgList').attr('hidden',false)
+        $('#rejectedOrgList').attr('hidden',true)
+        $('#approvedOrgList').attr('hidden',true)
+        var tableContent = document.getElementById("orgPartialReviewResults");
+        for (var i = 0; i < tableContent.children.length; i++) {
+            var child = tableContent.children[i];
+            child.removeAttribute('hidden');            
+        }
+    }
+    
+    function clickRejected(){
+        document.getElementById("searchReviewBar").value = "";
+        $('#pendingOrgList').attr('hidden',true)
+        $('#rejectedOrgList').attr('hidden',false)
+        $('#approvedOrgList').attr('hidden',true)
+        var tableContent = document.getElementById("orgRejectedResults");
+        for (var i = 0; i < tableContent.children.length; i++) {
+            var child = tableContent.children[i];
+            child.removeAttribute('hidden');            
+        }
+    }
+</script>
+
+
+</html>

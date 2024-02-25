@@ -1,0 +1,97 @@
+<div class="contentFlexCol">
+    <div class="" id="allVigilanceResults">
+        {% for organisation in organisations %}
+            <div class="eventItems contentFlexRow align-items-center" id="{{ organisation.organisationName }}">
+                <div class="col-lg-4">
+                    {% if  organisation.organisationImage1 %}
+                        <img class="reducedimage" src="{{ organisation.organisationImage1.url }}" alt="Image 1">
+                    {% else %}
+                        <div class="reducedImageEmpty textRed ">No Image</div>
+                    {% endif %}
+                </div>
+                <div class="titleText col-lg-3">
+                    {{ organisation.organisationName }}
+                </div>
+                <div class="rejectionText col-lg-3">
+                    <div class="textRed">Reports from users: {{ organisation.complains }}</div>
+                    <div>Donations accumulated: {{ organisation.donations }}</div>
+                    <div>Funds paid: {{ organisation.paidToDate }}/{{ organisation.donations }}</div>
+                </div>
+                <div class="col-lg-2" style="display: flex;">
+                    <button id="userViewEventButton{{ organisation.organisationId }}" onclick="clickUserViewOrgButton('{{ organisation.organisationId|safe }}')"
+                        class="simpleButton">
+                        View
+                    </button>
+                    <button id="PayoutButton{{ organisation.organisationId }}" onclick="clickPayoutButton('{{ organisation.organisationId|safe }}')"
+                        class="simpleButton">
+                        Payout
+                    </button>
+            </div>
+        </div>
+        {% endfor %} 
+    </div>
+</div>
+
+<div class="modal" id="payoutModal">
+    <div class="modal-dialog">
+        <div class="modal-content">    
+            <div class="modal-header">
+                <h4 class="modal-title">Update Organisation Details</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <form method="post" action="{% url 'addPayout' %}" enctype="multipart/form-data"> 
+                {% csrf_token %}
+                <div class="modal-body contentFlexRow">
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="donationOrganisationId">OrganisationId:</label>
+                            <input type="text" class="form-control" id="donationOrganisationId" name="donationOrganisationId" value="{{ organisationDetails.organisationId }}" readonly>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="donationValue">Value:</label>
+                            <input type="number" class="form-control" id="donationValue" name="donationValue" value="">
+                        </div>                  
+                    </div> 
+                </div> 
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Include</button>
+                </div>
+            </form>  
+        </div>
+    </div>
+</div>
+
+<script>
+    var userLoggedIn = "{{ userLoggedIn }}";
+    console.log(userLoggedIn);
+    
+    function clickUserViewOrgButton(val){
+        window.location.href = "/fypApp/organisation/" + val;
+    }
+
+    function clickPayoutButton(val){
+        var selectedOrg = val;
+        console.log("selectedOrg: "+selectedOrg)
+        $('#donationOrganisationId').val(selectedOrg);
+        $('#payoutModal').modal('show');
+    }
+
+    function searchVigilanceClick() {
+        var toSearch = document.getElementById("searchVigilanceBar").value.toLowerCase();
+        var tableContent = document.getElementById("allVigilanceResults");
+        console.log(toSearch);
+        console.log(tableContent);
+
+        for (var i = 0; i < tableContent.children.length; i++) {
+            var child = tableContent.children[i];
+
+            var childId = child.id ? child.id.toLowerCase() : "";
+            if (childId && childId.indexOf(toSearch) === -1) {
+                child.setAttribute('hidden', true);
+            } else {
+                child.removeAttribute('hidden');
+            }
+        }
+    }
+</script>

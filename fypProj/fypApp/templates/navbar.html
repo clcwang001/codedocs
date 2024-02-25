@@ -1,0 +1,301 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+<div class="navbar">
+    <div class="AlignLeft">
+        <div class="NavText headerBold" onclick="redirectToHome()" id="sureGoodButton">SureGood!</div>
+        {% if userLoggedIn %}
+        {% if userLoggedIn.userType == 1 %}
+        <button id="ReviewCharitiesButton" onclick="redirectToOrgReview()">
+            Review Charites
+        </button>
+        <button id="vigilanceButton" onclick="VigilanceChecks()">
+            Heightened Vigilance
+        </button>
+
+        {% elif userLoggedIn.userType == 2 and user.isOrganisation and not user.isNewUser %}
+        <button id="UsersView" onclick="redirectToUserView()">
+            User's View
+        </button>
+        <button id="OrganisationHomeButton" onclick="redirectToOrganisationHome()">
+            Organisation Details
+        </button>
+        <button id="OrganisationMyEventsButton" onclick="redirectToOrganisationEvents()">
+            Events
+        </button>
+        {% elif userLoggedIn.userType == 2 and user.isOrganisation and user.isNewUser %}
+        <button id="CreateOrgButton" onclick="CreateOrgButtonClick()">
+            Create Organisation Details
+        </button>
+        {% elif userLoggedIn.userType == 2 and not user.isOrganisation %}
+        <button id="EventsButton" onclick="redirectToAllEvents()">
+            Events
+        </button>
+        <button id="OrganisationsButton" onclick="redirectToAllOrganisations()">
+            Organisations
+        </button>
+        {% endif %}
+        {% endif %}
+    </div>
+    <div class="AlignRight">
+        {% if userLoggedIn %}
+        <div class="NavText">{{ userLoggedIn.username }}
+            <div class="dropdown-content" id="userDropdownContent">
+                <a href="#" onclick="redirectToMyProfile()">My Profile</a>
+                {% if userLoggedIn.userType == 2 and not user.isOrganisation %}
+                <a href="#" onclick="redirectToRegisteredActivities()">Registered events</a>
+                <a href="#" onclick="redirectToLikedActivities()">Liked events</a>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <!-- User is not logged in -->
+        <button id="SignUpButton" onclick="toggleSignUpPopup()">
+            SignUp
+        </button>
+        {% endif %}
+
+        <button id="loginButton" onclick="toggleLoginPopup()">
+            {% if userLoggedIn %}
+            Logout
+            {% else %}
+            Sign In
+            {% endif %}
+        </button>
+    </div>
+</div>
+
+<div class="login-container" id="loginPopup">
+    <h2>Login</h2>
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <div class="divcenter contentFlexCol">
+            <button onclick="closeLoginDiv()" class="signupButton marginBetweenTextDivs">Cancel</button>
+            <button type="submit" class="loginButton marginBetweenTextDivs">Login</button>
+        </div>
+    </form>
+</div>
+
+<div class="login-container" id="signupPopup">
+    <h2>Sign Up</h2>
+    <form method="post" action="{% url 'signup' %}">
+        {% csrf_token %}
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password1">Password:</label>
+        <input type="password" id="password1" name="password1" required>
+
+        <label for="password2">Confirm Password:</label>
+        <input type="password" id="password2" name="password2" required>
+
+        <label for="contactNumber">Contact Number:</label>
+        <input type="number" id="contactNumber" name="contactNumber" required>
+
+        <label for="isOrganisation">Are you an organisation?</label>
+        <input type="checkbox" id="isOrganisation" name="isOrganisation">
+
+        <div class="divcenter contentFlexCol">
+            <button onclick="closeSignupDiv()" class="signupButton marginBetweenTextDivs">Cancel</button>
+            <button type="submit" class="signupButton marginBetweenTextDivs">Sign Up</button>
+        </div>
+    </form>
+</div>
+
+
+<div class="modal" id="organisationCreationModal">
+    <div class="modal-dialog modalsizing">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Create Organisation Details</h4>
+            </div>
+            <form method="post" action="{% url 'createDetails' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body contentFlexRow">
+                    <div class="col-lg-8">
+                        <div class="form-group">
+                            <label for="organisationName">Organisation Name:</label>
+                            <input type="text" class="form-control" id="organisationName" name="organisationName"
+                                value="{{userLoggedIn}}" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="organisationFocus">Organisation Focus:</label>
+                            <input type="text" class="form-control" id="organisationFocus" name="organisationFocus"
+                                value="">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="organisationShortDescription">Short Description:</label>
+                            <textarea class="form-control shortdesctextarea" id="organisationShortDescription"
+                                name="organisationShortDescription"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="organisationLongDescription">Long Description:</label>
+                            <textarea class="form-control longdesctextarea" id="organisationLongDescription"
+                                name="organisationLongDescription"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="">
+                            <div>
+                                <label for="organisationImage1">Image 1:</label>
+                            </div>
+                            {% if organisationDetails.organisationImage1 %}
+                            <img id="ogImg1" class="threeimage" src="{{ organisationDetails.organisationImage1.url }}"
+                                alt="Image 1">
+                            {% endif %}
+                            <input type="file" class="" id="organisationImage1" name="organisationImage1"
+                                style="padding: 10px 0;">
+                        </div>
+                        <div class="">
+                            <div>
+                                <label for="organisationImage2">Image 2:</label>
+                            </div>
+                            {% if organisationDetails.organisationImage2 %}
+                            <img id="ogImg2" class="threeimage" src="{{ organisationDetails.organisationImage2.url }}"
+                                alt="Image 2">
+                            {% endif %}
+                            <input type="file" class="" id="organisationImage2" name="organisationImage2"
+                                style="padding: 10px 0;">
+                        </div>
+                        <div class="">
+                            <div>
+                                <label for="organisationImage3">Image 3:</label>
+                            </div>
+                            {% if organisationDetails.organisationImage3 %}
+                            <img id="ogImg3" class="threeimage" src="{{ organisationDetails.organisationImage3.url }}"
+                                alt="Image 3">
+                            {% endif %}
+                            <input type="file" class="" id="organisationImage3" name="organisationImage3"
+                                style="padding: 10px 0;">
+                        </div>
+                        <div class="contentFlexRow" style="padding: 10px 0;">
+                            <div>
+                                <label class="" for="acceptQrDonations">Accept QR Donations</label>
+                            </div>
+                            <div class="NavText">
+                                <input type="checkbox" class="" id="acceptQrDonations" name="acceptQrDonations" {% if organisationDetails.acceptQrDonations %}checked{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.getElementById("userDropdown").addEventListener("mouseenter", function () {
+        document.getElementById("userDropdownContent").style.display = "block";
+    });
+
+    document.getElementById("userDropdown").addEventListener("mouseleave", function () {
+        document.getElementById("userDropdownContent").style.display = "none";
+    });
+
+    var userLoggedIn = "{{ userLoggedIn }}";
+    console.log(userLoggedIn);
+
+    function redirectToOrgReview() {
+        window.location.href = "/fypApp/orgReview";
+    }
+
+    function redirectToHome() {
+        if (userLoggedIn) {
+            window.location.href = "/fypApp/home";
+        }
+    }
+
+    function redirectToAllOrganisations() {
+        window.location.href = "/fypApp/redirectToAllOrganisations";
+    }
+
+    function redirectToAllEvents() {
+        window.location.href = "/fypApp/redirectToAllEvents";
+    }
+
+
+    function redirectToOrganisationEvents() {
+        window.location.href = "/fypApp/OrganisationEvents/" + userLoggedIn;
+    }
+
+    function redirectToUserView() {
+        window.location.href = "/fypApp/userView/" + userLoggedIn;
+    }
+
+    function redirectToOrganisationHome() {
+        window.location.href = "/fypApp/organisationHome";
+    }
+
+    function toggleLoginPopup() {
+        closeSignupDiv()
+        var loginPopup = document.getElementById('loginPopup');
+        var loginButton = document.getElementById('loginButton');
+
+        if (!userLoggedIn) {
+            loginPopup.style.display = 'block';
+            loginButton.textContent = 'Sign In';
+            console.log("OIjwrfjg")
+        }
+        else {
+            console.log("OIqef  efjwrfjg");
+            window.location.href = "{% url 'logout' %}";
+        }
+    }
+
+    function toggleSignUpPopup() {
+        closeLoginDiv()
+
+        var signUpPopup = document.getElementById('signupPopup');
+        signUpPopup.style.display = 'block';
+    }
+
+    function closeSignupDiv() {
+        var signUpPopup = document.getElementById('signupPopup');
+        signUpPopup.style.display = 'none';
+    }
+
+    function closeLoginDiv() {
+        var loginPopup = document.getElementById('loginPopup');
+        loginPopup.style.display = 'none';
+    }
+    function redirectToMyProfile() {
+        console.log("Redirecting to My Profile");
+        window.location.href = "/fypApp/myProfile/";
+    }
+
+    function redirectToRegisteredActivities() {
+        console.log("Redirecting to Activities");
+        window.location.href = "/fypApp/myActivities/";
+
+    }
+
+    function redirectToLikedActivities() {
+        console.log("Redirecting to Liked Activities");
+        window.location.href = "/fypApp/LikedActivities/";
+
+    }
+
+    function VigilanceChecks() {
+        window.location.href = "/fypApp/Vigilance/";
+    }
+
+    function CreateOrgButtonClick() {
+        $('#organisationCreationModal').modal('show');
+    }
+
+    
+</script>

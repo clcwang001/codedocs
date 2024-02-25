@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+
+<body>
+    {% include 'navbar.html' %}
+    <div>
+        <div class="contentBackgroundMargins">
+            <div class="contentBackground">
+                <div class="contentMargins">
+                    {% if userLoggedIn.username %}
+                        <h1>Hello, {{ userLoggedIn.username }}!</h1>
+                    {% endif %}
+                    <h3 class="col-lg-8">User Particulars</h3>
+
+                    <form id="profileForm" class="">    
+                        {% csrf_token %}
+                        <div class="modal-body contentFlexRow">
+                            <div class="col-lg-8">    
+                                <div class="form-group">
+                                    <label for="username">Username:</label>
+                                    <input type="text" class="form-control" id="username" name="username" value="{{ userLoggedIn.username }}" readonly>
+                                </div>
+                        
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="text" class="form-control" id="email" name="email" value="{{ userLoggedIn.email }}">
+                                </div>
+                        
+                                <div class="form-group">
+                                    <label for="contactNumber">Contact:</label>
+                                    <input type="text" class="form-control" id="contactNumber" name="contactNumber" value="{{ userLoggedIn.contactNumber }}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="contactNumber">User Type:</label>
+                                    <input type="text" class="form-control" id="contactNumber" 
+                                    value="{% if userLoggedIn.userType == 1 %}Administrator{% else %}Public User{% endif %} {% if userLoggedIn.userType == 2 %}{% if userLoggedIn.isOrganisation == true %}(Organisational User){% else %}(Standard User){% endif %}{% endif %}" readonly>
+                                </div>
+                            </div>                      
+                            
+                        </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>  
+                </div>
+            </div>
+        </div>
+    </div>   
+
+    <script>
+        var userLoggedIn = "{{ userLoggedIn }}";
+        console.log(userLoggedIn);        
+
+        
+        $('#profileForm').submit(function (e) {
+                e.preventDefault(); 
+                var formData = new FormData(this);
+                formData.append('csrfmiddlewaretoken', $('[name="csrfmiddlewaretoken"]').val());
+
+                console.log('Form Data:');
+                for (var pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                // Perform an AJAX request to update the organisation details
+                $.ajax({
+                    type: 'POST',
+                    url: '/fypApp/updateMyProfile/',  // Add a trailing slash
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // Update the modal content or perform any other actions
+                        console.log('Details updated successfully');
+                        location.reload(); 
+                    },
+                    error: function (error) {
+                        console.error('Error updating details:', error);
+                    }
+                });
+            });
+    </script>
+
+</body>
+
+</html>

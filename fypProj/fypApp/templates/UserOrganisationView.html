@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="contentBackgroundMargins">
+        <div class="contentBackground">
+            <div class="contentMargins">
+                {% include 'organisationDetailsPartial.html' %}
+                {% if activities|length >= 1 %}
+                    <div class="col-lg-8 marginBetweenTextDivs">
+                        <div class="titleTextSmaller">Events</div>
+                        {% include 'eventsPartial.html' %}  
+                    </div>                   
+                {% endif %}
+                {% if rejectionReason %}
+                    {% if userLoggedIn.userType == 1 %}
+                    <div class="col-lg-8 rejectionText textRed marginBetweenTextDivs">*Previous Rejection Reason: {{ rejectionReason }}</div>
+                    {% elif userLoggedIn == organisationDetails.organisationId %}
+                    <div class="col-lg-8 rejectionText textRed marginBetweenTextDivs">This organisation is not visible to users.</div>
+                    <div class="col-lg-8 rejectionText textRed">*Rejection Reason: {{ rejectionReason }}</div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="marginBetweenTextDivs divcenter contentFlexRow" id="adminHiddenBtns" hidden>
+                        {% if isApprovedOrganisation %}
+                            <button id="revokeOrgBtn" class="simpleButton" onclick="OpenRejectionPopup()">Revoke Approval</button>
+                        {% else %}
+                            <button id="approveOrgBtn" class="simpleButton" onclick="ApproveOrganisation('{{ organisationDetails.organisationId|safe }}')">Approve</button>
+                            {% if recentlyUpdated %}
+                            <button id="rejectOrgBtn" class="simpleButton" onclick="OpenRejectionPopup()">Reject</button>
+                            {% endif %}
+                        {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="organisationRejectionModal">
+        <div class="modal-dialog modalsizing">
+            <div class="modal-content">    
+                <div class="modal-header">
+                    <h4 class="modal-title" id="updateModalTitle"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form id="organisationRejectionForm" class="">    
+                    {% csrf_token %}
+                    <div class="modal-body contentFlexRow">
+                        <div class="col-lg-8">
+                            <div class="form-group">
+                                <label for="organisationId">Orgnaisation Name:</label>
+                                <input type="text" class="form-control" id="organisationId" name="organisationId" value="{{ organisationDetails.organisationId }}" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rejectionReason">Rejection Reason:</label>
+                                <textarea class="form-control longdesctextarea" id="rejectionReason" name="rejectionReason">{{ activity.description }}</textarea>
+                            </div>
+                        </div>          
+                        
+                    </div>
+                    <div class="modal-footer" id="modalFooter">
+                        <button type="submit" class="btn btn-primary">Reject</button>
+                    </div>
+                </form>  
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+
+
+<script>
+    var userLoggedIn = "{{ userLoggedIn }}";
+    var userType = "{{ userType}}";
+    console.log(userLoggedIn+"HERE");
+    console.log(userType);
+
+    $(document).ready(function () {
+        if (userType == 1) {
+            $("#adminHiddenBtns").attr('hidden', false);
+        } else {
+            $("#adminHiddenBtns").attr('hidden', true);
+        }
+
+        $('#organisationRejectionForm').submit(function (e) {
+                e.preventDefault(); 
+                var formData = new FormData(this);
+                formData.append('csrfmiddlewaretoken', $('[name="csrfmiddlewaretoken"]').val());
+
+                console.log('Form Data:');
+                for (var pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '/fypApp/organisationRejecton/', 
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log('Details updated successfully');
+                        $('#organisationRejectionModal').modal('hide');
+                        window.location.href = '/fypApp/orgReview'; 
+                    },
+                    error: function (error) {
+                        console.error('Error updating details:', error);
+                    }
+                });
+            });
+    })
+
+    function ApproveOrganisation(val){
+        var formData = new FormData();
+        formData.append('csrfmiddlewaretoken', $('[name="csrfmiddlewaretoken"]').val());
+        formData.append('organisationId', val);
+
+        console.log('Form Data:');
+                for (var pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+
+        $.ajax({
+                    type: 'POST',
+                    url: '/fypApp/organisationApproval/', 
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log('Details updated successfully');
+                        window.location.href = '/fypApp/orgReview'; 
+                    },
+                    error: function (error) {
+                        console.error('Error updating details:', error);
+                    }
+                });
+    }
+
+    function OpenRejectionPopup(){
+        $('#organisationRejectionModal').modal('show');
+    }
+
+    function reportOrganisationBtn(val){
+        var formData = new FormData();
+        formData.append('csrfmiddlewaretoken', $('[name="csrfmiddlewaretoken"]').val());
+        formData.append('organisationId', val);
+
+        console.log('Form Data:');
+                for (var pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+        $.ajax({
+                    type: 'POST',
+                    url: '/fypApp/reportOrg/', 
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log('Details updated successfully');
+                        window.location.href = '/fypApp/organisation/'+val; 
+                    },
+                    error: function (error) {
+                        console.error('Error updating details:', error);
+                    }
+                });
+    }
+</script>
+
+</html>

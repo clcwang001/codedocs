@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="contentBackgroundMargins">
+        <div class="contentBackground">
+            <div class="contentMargins">
+                <div class="titleTextSmaller divcenter contentFlexRow">
+                    {% if isSignup %}
+                        Registered Events
+                    {% else %}
+                        Liked Events
+                    {% endif %}
+                </div>
+                <div class="contentFlexRow divcenter">
+                <div class="col-lg-8">
+                    <div class="contentMargins">
+                        <div class="contentFlexRow align-items-center">
+                            <label for="search">Search:</label>
+                            <input type="text" class="form-control NavText" id="search" name="search" value="">
+                            <button id="" class="simpleButton">
+                                    View
+                                </button>
+                        </div>
+                    </div>
+
+                    <div class="marginBetweenTextDivs">
+                    {% include 'eventsPartial.html' %}  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

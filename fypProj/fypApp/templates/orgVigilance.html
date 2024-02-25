@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="contentBackgroundMargins">
+        <div class="contentBackground">
+            <div class="contentMargins">
+                <div class="titleTextSmaller divcenter contentFlexRow">Organisation Vigilance</div>
+                <div class="contentFlexRow divcenter">
+                <div class="col-lg-8">
+                    <div class="contentMargins">
+                        <div class="contentFlexRow align-items-center">
+                            <label for="search">Search:</label>
+                            <input type="text" class="form-control NavText" id="searchVigilanceBar" name="search" value="">
+                            <button id="" class="simpleButton" onclick="searchVigilanceClick()">
+                                    View
+                                </button>
+                        </div>
+                    </div>
+
+                    <div class="marginBetweenTextDivs" id="approvedOrgList">
+                        {% include 'organisationsPartialDueDiligence.html' %}  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    
+</script>
+
+
+</html>

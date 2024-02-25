@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+
+<body>
+    {% include 'navbar.html' %}
+    <div>
+        <div class="contentBackgroundMargins">
+            <div class="contentBackground">
+                <div class="contentMargins">
+                    {% if errormsg %}
+                        <div class="alert alert-danger">
+                            <div><h3>Error</h3></div>
+                            <div>{{errormsg}}</div>
+                        </div>
+                    {% endif %}
+
+                    {% if userLoggedIn.username %}
+                        <h1>Welcome, {{ userLoggedIn.username }}!</h1>
+                    {% endif %}
+                    <h3 class="col-lg-8">Suregood</h3>
+                    <p class="col-lg-8">SureGood isn't just your typical charity platform. 
+                        More of a charity hub that gives every one a piece of mind.
+                        Here, We understand that giving is not just about 
+                        monetary contributions; it's a thrilling journey of participation, 
+                        engagement, and community building. 
+                        SureGood aims for a world where every good deed sparks change 
+                        and every cent ignites a ripple effect of goodness!.</p>
+                    <h6 class="col-lg-8">Whether you're an individual looking to make a difference or an 
+                        organization seeking support, SureGood is your platform to connect, 
+                        contribute, and create change. </h6>
+                    <div class="contentFlexRow">
+                        <div class="col-lg-6">
+                            <div class="titleTextSmaller divcenter contentFlexRow marginBetweenTextDivs">Upcoming Events!</div>
+                            <div class="marginBetweenTextDivs">
+                                {% include 'eventsPartial.html' %}  
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="titleTextSmaller divcenter contentFlexRow marginBetweenTextDivs">Top Organisations!</div>
+                            <div class="marginBetweenTextDivs">
+                            {% include 'organisationsPartial.html' %}  
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>   
+
+    <script>
+        var userLoggedIn = "{{ userLoggedIn }}";
+        console.log(userLoggedIn);        
+
+    </script>
+
+</body>
+
+</html>

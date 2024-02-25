@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="contentBackgroundMargins">
+        <div class="contentBackground">
+            <div class="contentMargins">
+                <div class="titleTextSmaller divcenter contentFlexRow">Events</div>
+                <button id="AddEventButton" onclick="openAddEventDetailsForm()" class="simpleButton">
+                    Add Event
+                </button>
+                <table id="activityTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Title (Type)</th>
+                            <th>Signups</th>
+                            <th>Action</th>
+                            <th hidden>Hidden</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in activities %}
+                            <tr>
+                                <td>
+                                    {% if activity.activityImage1 %}
+                                        <img class="reducedimage" src="{{ activity.activityImage1.url }}">
+                                    {% endif %}
+                                </td>
+                                <td>{{ activity.title }} ({{ activity.activityType }})</td>
+                                <td>{{ activity.currentsignup }}/{{ activity.maximumSignups }}</td>
+                                <td>                                
+                                    <button id="ViewEventButton{{ activity.activityId }}" onclick="clickEventUpdateBtn(false, '{{ activity.activityId|safe }}',
+                                    '{{ activity.title|safe }}', '{{ activity.activityType|safe }}', '{{ activity.maximumSignups|safe }}')" class="simpleButton">
+                                        View
+                                    </button>
+                                    <button id="EditEventButton{{ activity.activityId }}" onclick="clickEventUpdateBtn(true, '{{ activity.activityId|safe }}',
+                                    '{{ activity.title|safe }}', '{{ activity.activityType|safe }}', '{{ activity.maximumSignups|safe }}')" class="simpleButton">                                    Edit
+                                    </button>
+                                    <button id="CancelEventButton{{ activity.activityId }}" onclick="" class="simpleButton">
+                                        Cancel
+                                    </button>
+                                </td>
+                                <td hidden>
+                                    <div id="tableActivityDesc{{ activity.activityId }}">{{ activity.description }}</div>
+                                    <div id="tableActivityImage1{{ activity.activityId }}">
+                                        {% if activity.activityImage1 %}
+                                            {{ activity.activityImage1.url }}
+                                        {% endif %}
+                                    </div>
+                                    <div id="tableActivityImage2{{ activity.activityId }}">
+                                        {% if activity.activityImage2 %}
+                                            {{ activity.activityImage2.url }}
+                                        {% endif %}
+                                    </div>
+                                    <div id="tableActivityImage3{{ activity.activityId }}">
+                                        {% if activity.activityImage3 %}
+                                            {{ activity.activityImage3.url }}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="eventDetailsModal">
+        <div class="modal-dialog modalsizing">
+            <div class="modal-content">    
+                <div class="modal-header">
+                    <h4 class="modal-title" id="updateModalTitle"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <form id="eventDetailsForm" class="">    
+                    {% csrf_token %}
+                    <div class="modal-body contentFlexRow">
+                        <div class="col-lg-8">
+                            <div class="form-group" hidden>
+                                <label for="activityId">Activity id:</label>
+                                <input type="text" class="form-control" id="activityId" name="activityId" value="{{ activity.activityId }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="activityTitle">Activity Title:</label>
+                                <input type="text" class="form-control" id="activityTitle" name="activityTitle" value="{{ activity.title }}">
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="activityType">Activity Type:</label>
+                                <input type="text" class="form-control" id="activityType" name="activityType" value="{{ activity.activityType }}">
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="activityDescription">Activity Description:</label>
+                                <textarea class="form-control shortdesctextarea" id="activityDescription" name="activityDescription">{{ activity.description }}</textarea>
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="maximumSignups">Maximum Signups:</label>
+                                <input type="number" class="form-control" id="maximumSignups" name="maximumSignups" value="{{ activity.maximumSignups }}">
+                            </div>
+                        </div>
+                    
+                        <div class="col-lg-4">
+                            <div class="">
+                                <div>
+                                    <label for="activityImage1">Image 1:</label>
+                                </div>
+                                <div id="modalImg1noImg" class="threeimageEmpty textRed" hidden>No Image</div>
+                                <img id="modalImg1" class="threeimage" src="" alt="Image 1">
+                                <input type="file" class="" id="activityImage1" name="activityImage1" style="padding: 10px 0;">
+                            </div>
+                    
+                            <div class="">
+                                <div>
+                                    <label for="activityImage2">Image 2:</label>
+                                </div>
+                                <div id="modalImg2noImg" class="threeimageEmpty textRed" hidden>No Image</div>
+                                <img id="modalImg2" class="threeimage" src="" alt="Image 2">
+                                <input type="file" class="" id="activityImage2" name="activityImage2" style="padding: 10px 0;">
+                            </div>
+                    
+                            <div class="">
+                                <div>
+                                    <label for="activityImage3">Image 3:</label>
+                                </div>
+                                <div id="modalImg3noImg" class="threeimageEmpty textRed" hidden>No Image</div>
+                                <img id="modalImg3" class="threeimage" src="" alt="Image 3">
+                                <input type="file" class="" id="activityImage3" name="activityImage3" style="padding: 10px 0;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" id="modalFooter">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>  
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        var userLoggedIn = "{{ userLoggedIn }}";
+        console.log(userLoggedIn);
+
+        function clickEventUpdateBtn(val,activityId, title,activityType,maximumSignups){
+            if (val){
+                $('#eventDetailsForm :input').attr('readonly', false);
+                $('#updateModalTitle').text("Update Event Details");       
+                $('#activityImage1').attr('hidden', false);
+                $('#activityImage2').attr('hidden', false);
+                $('#activityImage3').attr('hidden', false);    
+                $('#modalFooter').attr('hidden', false);      
+
+                var activityImage1Input = document.getElementById('activityImage1');
+                var modalImg1 = document.getElementById('modalImg1');
+
+                activityImage1Input.addEventListener('change', function () {
+                    if (activityImage1Input.files && activityImage1Input.files[0]) {
+                        var reader = new FileReader();
+                        $('#modalImg1noImg').attr('hidden', true);
+                        $('#modalImg1').attr('hidden', false);
+                        reader.onload = function (e) {
+                            modalImg1.src = e.target.result;
+                        };
+                        reader.readAsDataURL(activityImage1Input.files[0]);
+                    }
+                });
+
+                // Image 2
+                var activityImage2Input = document.getElementById('activityImage2');
+                var modalImg2 = document.getElementById('modalImg2');
+
+                activityImage2Input.addEventListener('change', function () {
+                    if (activityImage2Input.files && activityImage2Input.files[0]) {
+                        var reader = new FileReader();
+                        $('#modalImg2noImg').attr('hidden', true);
+                        $('#modalImg2').attr('hidden', false);
+                        reader.onload = function (e) {
+                            modalImg2.src = e.target.result;
+                        };
+                        reader.readAsDataURL(activityImage2Input.files[0]);
+                    }
+                });
+
+                // Image 3
+                var activityImage3Input = document.getElementById('activityImage3');
+                var modalImg3 = document.getElementById('modalImg3');
+
+                activityImage3Input.addEventListener('change', function () {
+                    if (activityImage3Input.files && activityImage3Input.files[0]) {
+                        var reader = new FileReader();
+                        $('#modalImg3noImg').attr('hidden', true);
+                        $('#modalImg3').attr('hidden', false);
+                        reader.onload = function (e) {
+                            modalImg3.src = e.target.result;
+                        };
+                        reader.readAsDataURL(activityImage3Input.files[0]);
+                    }
+                });
+                
+            }
+            else{
+                $('#eventDetailsForm :input').attr('readonly', true);
+                $('#updateModalTitle').text("Event Details");
+                $('#activityImage1').attr('hidden', true);
+                $('#activityImage2').attr('hidden', true);
+                $('#activityImage3').attr('hidden', true);
+                $('#modalFooter').attr('hidden', true);        
+            }
+            openEventDetailsForm(); 
+            document.getElementById("activityId").value = activityId;
+            document.getElementById("activityTitle").value = title;
+            document.getElementById("activityType").value = activityType;
+            document.getElementById("activityDescription").value = document.getElementById('tableActivityDesc'+activityId).textContent;
+            document.getElementById("maximumSignups").value = maximumSignups;
+            var image1Url = document.getElementById("tableActivityImage1"+activityId).textContent.trim() || null;
+            var image2Url = document.getElementById("tableActivityImage2"+activityId).textContent.trim() || null;
+            var image3Url = document.getElementById("tableActivityImage3"+activityId).textContent.trim() || null;
+
+            if (!image1Url){
+                $('#modalImg1noImg').attr('hidden', false);
+                $('#modalImg1').attr('hidden', true);
+            }else{
+                $('#modalImg1noImg').attr('hidden', true);
+                $('#modalImg1').attr('hidden', false);
+                document.getElementById("modalImg1").src = image1Url;
+
+            }
+
+            if (!image2Url){
+                $('#modalImg2noImg').attr('hidden', false);
+                $('#modalImg2').attr('hidden', true);
+            }else{
+                $('#modalImg2noImg').attr('hidden', true);
+                $('#modalImg2').attr('hidden', false);
+                document.getElementById("modalImg2").src = image2Url;
+
+            }
+
+            if (!image3Url){
+                $('#modalImg3noImg').attr('hidden', false);
+                $('#modalImg3').attr('hidden', true);
+            }else{
+                $('#modalImg3noImg').attr('hidden', true);
+                $('#modalImg3').attr('hidden', false);
+                document.getElementById("modalImg3").src = image3Url;
+
+            }
+        }
+
+        function openAddEventDetailsForm(){            
+            openEventDetailsForm()
+            document.getElementById("activityId").value = "";
+            document.getElementById("activityTitle").value = "";
+            document.getElementById("activityType").value = "";
+            document.getElementById("activityDescription").value = "";
+            document.getElementById("maximumSignups").value = "";
+            document.getElementById("modalImg1").src = null;
+            document.getElementById("modalImg2").src = null;
+            document.getElementById("modalImg3").src = null;
+        }
+
+
+        function openEventDetailsForm() {
+            $('#eventDetailsModal').modal('show');
+        }
+
+        function closeEventDetailsForm() {
+            $('#eventDetailsModal').modal('hide');
+        }
+
+        $(document).ready(function () {
+            var table = $('#activityTable').DataTable({
+                dom: '<"row"<"col-md-6"l><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                searching: false 
+            });
+
+            $('#eventDetailsForm').submit(function (e) {
+                e.preventDefault(); 
+                var formData = new FormData(this);
+                formData.append('csrfmiddlewaretoken', $('[name="csrfmiddlewaretoken"]').val());
+
+                console.log('Form Data:');
+                for (var pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                // Perform an AJAX request to update the organisation details
+                $.ajax({
+                    type: 'POST',
+                    url: '/fypApp/updateEventDetails/',  // Add a trailing slash
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // Update the modal content or perform any other actions
+                        console.log('Details updated successfully');
+                        // Close the modal (optional)
+                        $('#eventDetailsModal').modal('hide');
+                        location.reload(); 
+                    },
+                    error: function (error) {
+                        console.error('Error updating details:', error);
+                    }
+                });
+            });
+        });        
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+<div class="contentFlexCol">
+    <div class="" id="orgRejectedResults">
+        {% for organisation in rejectedOrganisations %}
+            <div class="eventItems contentFlexRow align-items-center" id="{{ organisation.organisationName }}">
+                <div class="col-lg-4">
+                    {% if  organisation.organisationImage1 %}
+                        <img class="reducedimage" src="{{ organisation.organisationImage1.url }}" alt="Image 1">
+                    {% else %}
+                        <div class="reducedImageEmpty textRed ">No Image</div>
+                    {% endif %}
+                </div>
+                <div class="titleText col-lg-6">
+                    {{ organisation.organisationName }}
+                </div>
+                <div class="col-lg-2">
+                    <button id="userViewEventButton{{ organisation.organisationId }}" onclick="clickUserViewOrgButton('{{ organisation.organisationId|safe }}')"
+                    class="simpleButton">
+                    View
+                </button>
+                </div>
+            </div>
+        {% endfor %} 
+    </div>
+</div>
+
+<script>
+    var userLoggedIn = "{{ userLoggedIn }}";
+    console.log(userLoggedIn);
+    
+    function clickUserViewOrgButton(val){
+        window.location.href = "/fypApp/organisation/" + val;
+    }
+</script>
