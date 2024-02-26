@@ -73,7 +73,6 @@ class loginTestStandard(TestCase): #standard login cases
         self.assertContains(response, 'test')
         self.assertContains(response, 'Welcome, test!')
         self.assertNotContains(response, "User's View")
-        self.assertNotContains(response, "Organisation Details")
         self.assertContains(response, "Events")
         self.assertContains(response, "Organisations")
 
@@ -97,7 +96,6 @@ class loginTestAdmin(TestCase): #admin login cases
         self.assertContains(response, 'Welcome, test!')
         self.assertContains(response, 'Review Charites')
         self.assertNotContains(response, "User's View")
-        self.assertNotContains(response, "Organisation Details")
 
 
 

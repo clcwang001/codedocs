@@ -19,14 +19,12 @@ def index(request):
     organisationalDonationDetails = UserHasOrganisation.objects.all()
     
     highestVals = [0, 0, 0]
-    highestOrgs = [organisationalDonationDetails[0], organisationalDonationDetails[1],organisationalDonationDetails[2]]
+    highestOrgs = [None, None,None]
     for item in organisationalDetails:
         donationsum = 0
         for item2 in organisationalDonationDetails:
             if item.organisationId == item2.organisation:
                 donationsum += item2.donations
-        print("donationsum")
-        print(donationsum)
         if donationsum > highestVals[0]:
             highestVals[2] = highestVals[1]
             highestVals[1] = highestVals[0]
@@ -42,8 +40,6 @@ def index(request):
         elif donationsum > highestVals[2]:
             highestVals[1] = donationsum
             highestOrgs[1] = item
-    print("highestOrgs")
-    print(len(highestOrgs))
         
         
     
@@ -166,7 +162,7 @@ def userLogin(request):
     organisationalDonationDetails = UserHasOrganisation.objects.all()
     
     highestVals = [0, 0, 0]
-    highestOrgs = [organisationalDonationDetails[0], organisationalDonationDetails[1],organisationalDonationDetails[2]]
+    highestOrgs = [None,None,None]
     for item in organisationalDetails:
         donationsum = 0
         for item2 in organisationalDonationDetails:
@@ -254,7 +250,7 @@ def userLogout(request):
     organisationalDonationDetails = UserHasOrganisation.objects.all()
     
     highestVals = [0, 0, 0]
-    highestOrgs = [organisationalDonationDetails[0], organisationalDonationDetails[1],organisationalDonationDetails[2]]
+    highestOrgs = [None,None,None]
     for item in organisationalDetails:
         donationsum = 0
         for item2 in organisationalDonationDetails:
@@ -339,7 +335,7 @@ def signup(request):
     organisationalDonationDetails = UserHasOrganisation.objects.all()
     
     highestVals = [0, 0, 0]
-    highestOrgs = [organisationalDonationDetails[0], organisationalDonationDetails[1],organisationalDonationDetails[2]]
+    highestOrgs = [None,None,None]
     for item in organisationalDetails:
         donationsum = 0
         for item2 in organisationalDonationDetails:
