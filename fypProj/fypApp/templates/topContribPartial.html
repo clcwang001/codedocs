@@ -1,0 +1,26 @@
+<div class="contentFlexCol">
+    <div class="" id="topContribResults">
+        {% for donator in results %}
+            <div class="eventItems contentFlexRow align-items-center">                
+                <div class="titleText col-lg-4">
+                    {{ donator.User.username }}
+                </div>               
+               
+                <div class="col-lg-4">
+                    Total: ${{ donator.donationsum }}
+                </div>   
+                {% if donator.orgs%}
+                <div class="col-lg-4">
+                    {% for org in donator.orgs %}
+                        <div>{{ org.org }} - ${{ org.donation }}</div> 
+                    {% endfor %} 
+                </div> 
+                {% endif %}            
+            </div>
+        {% endfor %} 
+    </div>
+</div>
+
+<script>
+    var userLoggedIn = "{{ userLoggedIn }}";
+</script>

@@ -11,6 +11,9 @@
         <button id="vigilanceButton" onclick="VigilanceChecks()">
             Heightened Vigilance
         </button>
+        <button id="topContributorsButton" onclick="topContributorsChecks()">
+            Top Contributors
+        </button>
 
         {% elif userLoggedIn.userType == 2 and user.isOrganisation and not user.isNewUser %}
         <button id="UsersView" onclick="redirectToUserView()">
@@ -21,6 +24,9 @@
         </button>
         <button id="OrganisationMyEventsButton" onclick="redirectToOrganisationEvents()">
             Events
+        </button>
+        <button id="topContributorsButton" onclick="topContributorsChecks()">
+            Top Contributors
         </button>
         {% elif userLoggedIn.userType == 2 and user.isOrganisation and user.isNewUser %}
         <button id="CreateOrgButton" onclick="CreateOrgButtonClick()">
@@ -223,6 +229,10 @@
         window.location.href = "/fypApp/redirectToAllOrganisations";
     }
 
+    function topContributorsChecks() {
+        window.location.href = "/fypApp/topContributors";
+    }
+
     function redirectToAllEvents() {
         window.location.href = "/fypApp/redirectToAllEvents";
     }
@@ -244,7 +254,7 @@
         closeSignupDiv()
         var loginPopup = document.getElementById('loginPopup');
         var loginButton = document.getElementById('loginButton');
-
+        
         if (!userLoggedIn) {
             loginPopup.style.display = 'block';
             loginButton.textContent = 'Sign In';

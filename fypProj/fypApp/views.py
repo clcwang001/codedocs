@@ -151,6 +151,12 @@ class MockReportDetails:
         self.organisationName = organisationName
         self.donations = donations
 
+class TopContrib:
+    def __init__(self, User, donationsum, orgs):
+        self.User = User
+        self.donationsum = donationsum
+        self.orgs = orgs
+        
 def userLogin(request):
     organisationalUsers = Users.objects.filter(userType=2, isOrganisation=True, isApprovedOrganisation=True)
     organisationalUserIds = organisationalUsers.values_list('userId', flat=True)
@@ -1099,3 +1105,49 @@ def createDetails(request):
         )
     
     return render(request, 'OrganisationHome.html', {'userLoggedIn': request.user, 'organisationDetails':organisationDetailsUpdated, 'fromOrg':True})
+
+@login_required(login_url='login')
+def topContributors(request):
+    if request.user.userType == 1:
+        print("TYPE Admin")
+        donationusers = UserHasOrganisation.objects.all()
+        results = []
+        for item in donationusers:
+            user_exists = False
+
+            for result in results:
+                if result.User == item.user:
+                    result.donationsum+=item.donations
+                    result.orgs.append({'org': item.organisation, 'donation': item.donations})
+                    user_exists = True
+            if not user_exists: 
+                
+                result = TopContrib(
+                        User= item.user,
+                        donationsum=item.donations,    
+                        orgs=[{'org': item.organisation, 'donation': item.donations}],  # Create a new list of dictionaries
+                )
+                results.append(result)
+        
+        
+        sorted_users=sorted(results, key=attrgetter('donationsum'), reverse=True)
+        topDonors = sorted_users[:10]
+        
+        return render(request, 'TopContrib.html', {'userLoggedIn': request.user, 'results':topDonors})
+
+    elif request.user.userType == 2 and request.user.isOrganisation: 
+        print("TYPE NOTADMIN ") 
+        donationusers = UserHasOrganisation.objects.filter(organisation = request.user)
+        sorted_users=sorted(donationusers, key=attrgetter('donations'), reverse=True)
+        topDonors = sorted_users[:10]
+        results = []
+        for item in topDonors:
+            result = TopContrib(
+                User= item.user,
+                donationsum=item.donations,
+                orgs=[]
+            )
+            results.append(result)
+        return render(request, 'TopContrib.html', {'userLoggedIn': request.user, 'results':results})
+    else:
+        return render(request, 'TopContrib.html', {'userLoggedIn': request.user, 'results':[]})

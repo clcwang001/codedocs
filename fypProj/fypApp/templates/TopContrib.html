@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="contentBackgroundMargins">
+        <div class="contentBackground">
+            <div class="contentMargins">
+                <div class="titleTextSmaller divcenter contentFlexRow">Top Contributors</div>
+                <div class="contentFlexRow divcenter">
+                <div class="col-lg-6">
+                    <div class="marginBetweenTextDivs" id="approvedOrgList">
+                        {% include 'topContribPartial.html' %}  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    
+</script>
+
+
+</html>

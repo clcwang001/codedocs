@@ -32,6 +32,7 @@ urlpatterns = [
     path('eventUnlike/', views.eventUnlike, name='eventUnlike'),
     path('addDonationAmount/', views.addDonationAmount, name='addDonationAmount'),
     path('addPayout/', views.addPayout, name='addPayout'),
+    path('topContributors/', views.topContributors, name='topContributors'),
     path('', include(router.urls)),
     path('login/', userLogin, name='login'),
     path('logout/', userLogout, name='logout'), 
